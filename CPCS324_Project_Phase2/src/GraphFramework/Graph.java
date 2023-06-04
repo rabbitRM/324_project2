@@ -1,6 +1,5 @@
 package GraphFramework;
 
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -8,11 +7,47 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.Scanner;
 import java.util.Random;
-import PhoneNetworkApp.BluePrintsGraph;
+import PhoneNetworkApp.AFRouteMap;
 import java.util.Collections;
 
-public abstract class Graph{
 
+public abstract class Graph {
+
+    // Defining the data feilds
+    private static int vertexNo;
+    private static int edgeNo;
+    private static boolean isDiagraph;
+    private static ArrayList<Vertex> vertices = new ArrayList<Vertex>();
+    private static LinkedList<Edge>[] adjacencylist;
+
+    //-----------------------------------------------------------------------------
+    // Defining the constructor
+    public Graph() {
+
+    }
+
+    public Graph(int edgeNo, int vertexNo, boolean isDiagraph) {
+
+        this.vertexNo = vertexNo;
+        this.edgeNo = edgeNo;
+        this.isDiagraph = isDiagraph;
+
+        //initialize adjacency lists for all the vertices
+        for (int i = 0; i < vertexNo; i++) {
+            vertices.add(createVertex(i));
+        }
+
+        // creating the adjacency list for each
+        adjacencylist = new LinkedList[vertexNo];
+
+        for (int i = 0; i < vertexNo; i++) {
+            adjacencylist[i] = new LinkedList<>();
+        }
+
+    }
+
+    //-----------------------------------------------------------------------------
+    // Defining the setters and getters
     public static int getVertexNo() {
         return vertexNo;
     }
@@ -45,10 +80,7 @@ public abstract class Graph{
         Graph.vertices = vertices;
     }
 
-    public static LinkedList<Edge> getAdjacencylist( int index) {
-        return adjacencylist[index];
-    }
-      public static LinkedList<Edge>[] getAdjacencylist() {
+    public static LinkedList<Edge>[] getAdjacencylist() {
         return adjacencylist;
     }
 
@@ -56,84 +88,76 @@ public abstract class Graph{
         Graph.adjacencylist = adjacencylist;
     }
 
-    private static int vertexNo;
-    private static int edgeNo;
-    private static boolean isDiagraph;
-    private static ArrayList<Vertex> vertices = new ArrayList<Vertex>();
-    private static LinkedList<Edge>[] adjacencylist;
-    
-    public Graph(int edgeNo,int vno, boolean isDiagraph) {
-        vertexNo=vno;
-        this.edgeNo = edgeNo;
-        this.isDiagraph = isDiagraph;
-        
-        adjacencylist = new LinkedList[vno];
-            //initialize adjacency lists for all the vertices
-              for (int i = 0; i <vno ; i++) {
-               vertices.add(createVertex(i));
-            }
-            for (int i = 0; i <vno ; i++) {
-                adjacencylist[i] = new LinkedList<>();
-            }
-    }
-public Graph(){
-    
-}
-   public abstract Vertex createVertex(int label ) ;
-  
-   
+    //-----------------------------------------------------------------------------
+    // methods need to be overriden 
+    public abstract Vertex createVertex(int label);
 
-   public abstract Edge createEdge(Vertex source, Vertex target , int weight);
-   
-    
-     
+    public abstract Edge createEdge(Vertex source, Vertex target, int weight);
+
+    //-----------------------------------------------------------------------------
     // method n takes as parameters the number of vertices and the number of edges
     // It is responsible for creating a graph object with the specified parameters 
     // and randomly initializes the vertices’ labels, creating edges that connects the created vertices randomly
-    // and assigning them random weights alson Makeing sure that the resulting graph is connected. 
+    // and assigning them random weights alson Makeing sure that the resulting graph is connected
+    public void makeGraph(int vertexNum, int edgeNum, int isdirected) {
 
-     public void makeGraph(int vno , int eno , int isdia ) {
-       
-//         vertexNo=vno;
-//        this.edgeNo = edgeNo;
-        this.isDiagraph = isdia == 0 ? false : true ;
-        adjacencylist = new LinkedList[vno];
-            //initialize adjacency lists for all the vertices
-            for (int i = 0; i <vno ; i++) {
-                adjacencylist[i] = new LinkedList<>();
-            }
-            
-            
-        for (int i = 0; i < vno; i++) {
-         
+        // checking if the graph is directed or not 
+        this.isDiagraph = isdirected == 0 ? false : true;
+
+        // creating the adjacency list
+        adjacencylist = new LinkedList[vertexNum];
+
+        for (int i = 0; i < vertexNum; i++) {
+            adjacencylist[i] = new LinkedList<>();
+        }
+
+        // Adding the vertices to its list in the graph
+        for (int i = 0; i < vertexNum; i++) {
+
             vertices.add(createVertex(i));
-            // incrementing the vertices number as requested ! 
-          vertexNo++;
+
+            // incrementing the vertices number in the graph
+            vertexNo++;
         }
 
-       // object of Random class
-        Random randm = new Random();
-        // ensure that all verts are connected
-        for (int i = 0; i < vno - 1; i++) {
-            int weight = randm.nextInt(20) + 1;//generate random edge weights between 0-20
-            addEdge(vertices.get(i), vertices.get(i+1), weight);    //connect verts
-            if (!isDiagraph) {
-               addEdge(vertices.get(i+1), vertices.get(i), weight);  
-            }
+        // creating random object to get random weights
+        Random random = new Random();
+
+        // loop to connect vertices together
+        for (int i = 0; i < vertexNum - 1; i++) {
+
+            // getting random weights between 1-40
+            int weight = random.nextInt(40) + 1;
+
+            // adding the new edge 
+            addEdge(vertices.get(i), vertices.get(i + 1), weight);
+
         }
 
-        // generate edges bewteen verts with the remaining edges
-        int remEdges = eno - (vno - 1);
+        // getting the number of remining edges we still have to create and connect
+        int reminingEdges = edgeNum - (vertexNum - 1);
 
-        for (int i = 0; i < remEdges; i++) {
-            int source = randm.nextInt(vertexNo);
-            int target = randm.nextInt(vertexNo);
-            if (target == source || areConnected(vertices.get(source), vertices.get(target))) { // to avoid self loops and duplicate edges
+        // loop to create the remining edges
+        for (int i = 0; i < reminingEdges; i++) {
+
+            // using the random object to get random source and target to connects
+            // the random numbers will be between 0 - vertexNo
+            int source = random.nextInt(vertexNo);
+            int target = random.nextInt(vertexNo);
+
+            // checking if the random target and source are the same or the these two vertices are already connected
+            if (target == source || areConnected(vertices.get(source), vertices.get(target))) {
+
+                // because we dont want this iteration to go to waste , we decrement as if nothing happened
                 i--;
+
+                // go back to the begining of the loop 
                 continue;
             }
-            // generate random weights in range 0 to 20
-            int weight = randm.nextInt(20) + 1;
+
+            // getting random weights between 1-40
+            int weight = random.nextInt(40) + 1;
+
             // add edge to the graph
             addEdge(vertices.get(source), vertices.get(target), weight);
 
@@ -141,221 +165,279 @@ public Graph(){
 
     }
 
-    // method to check if 2 vetices are connect with an edge 
+    //-----------------------------------------------------------------------------
+    // Method to check if two vetices are connected 
+    // It will get a sources vertex and a target vertex 
     public static boolean areConnected(Vertex v1, Vertex v2) {
 
-            // getting the size of the adjList that store the edges to ba able to through it 
-            int size = v1.getAdjLists().size();
-           
-            // loop to got through the edges of a specefic vertex 
-            for (int j = 0; j < size; j++) {
-                
-                // if one if the vertices is a source and the other is a target then they are connected (:
-                if ((v1.getAdjLists().get(j).getSource() == v1 && v1.getAdjLists().get(j).getTarget() == v2)
-                        || (v1.getAdjLists().get(j).getSource() == v2 && v1.getAdjLists().get(j).getTarget() == v1)) {
-                    return true;
-                }
+        // getting the size of the adjList that store the edges to ba able to go through it 
+        int size = v1.getAdjLists().size();
 
+        // loop to got through the edges of a specefic vertex 
+        for (int j = 0; j < size; j++) {
+
+            // if one if the vertices is a source and the other is a target then they are connected 
+            if ((v1.getAdjLists().get(j).getSource() == v1 && v1.getAdjLists().get(j).getTarget() == v2)
+                    || (v1.getAdjLists().get(j).getSource() == v2 && v1.getAdjLists().get(j).getTarget() == v1)) {
+
+                return true;
             }
-        
+
+        }
+
+        // if there is no connection between them 
         return false;
+
     }
 
-    // method that reads the edges and vertices from the text file whose name is
-    // specified by the parameter filename and place the data in the Graph
-    public  void readGraphFromFile(String fileName) throws FileNotFoundException {
+    //-----------------------------------------------------------------------------
+    // Method that reads the edges and vertices from a text file, and place the data in the Graph
+    // It will get the text file name 
+    public void readGraphFromFile(String fileName) throws FileNotFoundException {
 
-        int eno = 0, vno = 0;
-        
-        
-        // checking if the file exist and print 
+        // initializing the variables with 0 
+        int edgeNum = 0, vertexNum = 0;
+
+        // checking if the file exist 
         File f = new File(fileName);
+
         if (!f.exists()) {
+
             System.out.println("File Does not exist !");
+
         }
-        
+
         // creating 2 scanner object
-        // scanner opject to read the data of the each edge
+        // scanner object to read the data of each edge
         Scanner input = new Scanner(f);
-        
+
         // scanner object to read the labels of each vertex 
         Scanner input2 = new Scanner(f);
 
+        // skipping to the part needed to be read which is( vertices labels )
         input2.nextLine();
         input2.nextLine();
-        
+
+        // skipping the word diagraph in the input file , because there is no meaning in reading it !
         input.next();
 
-        isDiagraph = input.nextInt() ==0  ? false : true;
-        
-        eno = input.nextInt();
-        vno = input.nextInt();
-      
-        
-       
-        adjacencylist = new LinkedList[vno];
-            //initialize adjacency lists for all the vertices
-            for (int i = 0; i <vno ; i++) {
-                adjacencylist[i] = new LinkedList<>();
-            }
-            
-        // list to store the labels 
-        int[] listLabels = new int[vno];
-        
-        
-        // counter act like index for the label list
+        // checking if the graph is directed or not 
+        isDiagraph = input.nextInt() == 0 ? false : true;
+
+        // reading the edges number 
+        edgeNum = input.nextInt();
+
+        //reading the vertices number 
+        vertexNum = input.nextInt();
+
+        // creating the adjacency list 
+        adjacencylist = new LinkedList[vertexNum];
+
+        for (int i = 0; i < vertexNum; i++) {
+            adjacencylist[i] = new LinkedList<>();
+        }
+
+        // creating a list to store the vertices labels 
+        int[] listLabels = new int[vertexNum];
+
+        // creating a counter to be the index for the labels list
         int counter = 0;
-        listLabels[0] = 0 ;
+
+        // saving label 0 in list of labels because we can not save in the loop  
+        listLabels[0] = 0;
+
         // loop to store the distinct labels of each edge 
-        for (int i = 0; i < eno; i++) {
-            
-            // reading the label 
+        for (int i = 0; i < edgeNum; i++) {
+
+            // reading the character labels fron the file 
             char ch1 = input2.next().charAt(0);
             char ch2 = input2.next().charAt(0);
-         
-            // a flag to know wether to add the label to the list or not 
-            boolean canAdd1 = true;  boolean canAdd2 = true;
-            
+
+            // a flag to know wether to add the labels to the list or not 
+            boolean canAdd1 = true;
+            boolean canAdd2 = true;
+
             // loop to go through the list labels
-            // to check if the label is already exist
             for (int j = 0; j < listLabels.length; j++) {
-               
-                if (listLabels[j] == ( ch1-'A') ) {
-                  
+
+                // checking if the first label is already stored 
+                // because we store the labels as integers , when comparing we need to convert the char nito integer
+                // by substracting 'A' from it we will get a number, hence valid comparison
+                if (listLabels[j] == (ch1 - 'A')) {
+
+                    // if the first label is already stored , then make the flag1 = false 
                     canAdd1 = false;
-                    
+
                 }
-                
-                if (listLabels[j] == ( ch2-'A')){
-                    canAdd2 =false ;
+
+                // checking if the second label is already stored 
+                // because we store the labels as integers , when comparing we need to convert the char nito integer
+                // by substracting 'A' from it we will get a number, hence valid comparison
+                if (listLabels[j] == (ch2 - 'A')) {
+
+                    // if the second label is already stored , then make the flag2 = false 
+                    canAdd2 = false;
                 }
             }
-            
+
+            // moving the pointer to the next line , 
+            // because we dont need to read the weights of the edges with this pointer 
             input2.nextLine();
-            
-            // if the flag = true , then we can add the label 
+
+            // if the flag1 = true , then we can add the first label 
             // and increment the index to the next place for another label 
-            if (canAdd1 ) {
-              
-                listLabels[counter] = ch1-'A';
+            if (canAdd1) {
+
+                listLabels[counter] = ch1 - 'A';
+
                 counter++;
             }
-            
-            if(canAdd2){
-               
-                listLabels[counter] = ch2-'A';
+
+            // if the flag2 = true , then we can add the first label 
+            // and increment the index to the next place for another label 
+            if (canAdd2) {
+
+                listLabels[counter] = ch2 - 'A';
+
                 counter++;
             }
+
         }
-        
+
+        // After getting the labels , now we create the vertices with these labels 
         // Adding the vertices to its list in the graph
-        for (int i = 0; i < vno; i++) {
-          
+        for (int i = 0; i < vertexNum; i++) {
+
             vertices.add(createVertex(listLabels[i]));
-            
-            // incrementing the vertices number as requested ! 
+
+            // incrementing the vertices number in the graph 
             vertexNo++;
         }
-     
-        
-        // Adding the edges 
+
+        // connecting the vertices together ( creating edges ) 
         // creating and initializing the needed variables 
         char label1, label2;
-        
-        Vertex v1 = null, v2 = null;
-        
+
+        Vertex vertex1 = null, vertex2 = null;
+
         // loop to go through each edge in the file 
-        for (int i = 0; i < eno; i++) {
-           
+        for (int i = 0; i < edgeNum; i++) {
+
             // reading the labels for the source and target vetices 
             label1 = input.next().charAt(0);
             label2 = input.next().charAt(0);
 
-            // loop to go through the vetices list 
-            // to get the vetices objects with same readen labels
+            // loop to go through the vertices list 
+            // to get the vetices objects with same readed labels
             for (int j = 0; j < vertices.size(); j++) {
-                
-                // if the current vertixs’s labels is the same labels 
-                if (vertices.get(j).getLabel() == label1 - 'A') 
-                    
-                    v1 = vertices.get(j);
-                    
-               else if (vertices.get(j).getLabel() == label2-'A') 
-                   
-                    v2 = vertices.get(j);
-                
+
+                // if the current vertex label is the same as the first readed labels 
+                if (vertices.get(j).getLabel() == label1 - 'A') {
+
+                    // save in first vertex
+                    vertex1 = vertices.get(j);
+
+                    // if the current vertex label is the same as the second readed labels 
+                } else if (vertices.get(j).getLabel() == label2 - 'A') {
+
+                    // save in second vertex
+                    vertex2 = vertices.get(j);
+                }
+
             }
-           
-            // checking if both variables are not null , to not cause null pointer exeption !
-            if (v1 != null && v2 != null) {
-                
+
+            // checking if both vertices are not null , to not cause null pointer exeption !
+            if (vertex1 != null && vertex2 != null) {
+
                 // adding the new edge   
-             
-                addEdge(v1, v2, input.nextInt());
-               
+                addEdge(vertex1, vertex2, input.nextInt());
 
             }
 
         }
+
+        // sorting the vertices in their list in the graph
         Collections.sort(vertices, Comparator.comparingInt(vertex -> vertex.getLabel()));
-      
 
     }
 
+    //-----------------------------------------------------------------------------
+    // Method to add an edge to the graph 
+    // It will get the source vertex , target vertex and the weight
+    public void addEdge(Vertex source, Vertex target, int weight) {
 
-     public  void addEdge(Vertex source, Vertex target, int weight) {
-            Edge edge = createEdge(source, target, weight);
-            
-            
+        // creating the edge needed using the overriden method 
+        Edge edge = createEdge(source, target, weight);
 
-            Edge edge2 = createEdge(target, source, weight);
-           
-            
-           if (isDiagraph) {
-            source.getAdjLists().add(edge); edgeNo++;
+        // checking if the graph is directed
+        if (isDiagraph) {
+
+            // adding the edge to the list of edges in the source vertex  S --> T
+            source.getAdjLists().add(edge);
+
+            // adding the edge to the list of edges of the graph 
             adjacencylist[source.getLabel()].addFirst(edge);
-        } // if the graph is dirceted graph then both assign from source to taget
-        // and from taget to source --> <--
-        else {
-            adjacencylist[source.getLabel()].addFirst(edge);  
-            adjacencylist[target.getLabel()].addFirst(edge2);
-            source.getAdjLists().add(edge);  edgeNo += 2;
+
+            // incrementing the number of edges in the graph by 1 
+            edgeNo++;
+
+            // if the graph is not dirceted 
+            // and from taget to source then both assign from source to taget
+        } else {
+
+            // creating another edge , so the edge will b from both sides S --> <-- T
+            Edge edge2 = createEdge(target, source, weight);
+
+            // adding the edge to the list of edges in the source vertex  S --> T
+            source.getAdjLists().add(edge);
+
+            // adding the edge to the list of edges in the source vertex  S <-- T
             target.getAdjLists().add(edge2);
-           
+
+            // adding the edge to the list of edges of the graph S --> T 
+            adjacencylist[source.getLabel()].addFirst(edge);
+
+            // adding the edge to the list of edges of the graph S <-- T 
+            adjacencylist[target.getLabel()].addFirst(edge2);
+
+            // incrementing the number of edges in the graph by 2
+            edgeNo += 2;
+
         }
-        }
-     
-     
-      
-      public int findEdge(Vertex source , Vertex target){
-            for (int i = 0; i < adjacencylist.length; i++) {
-                
-                for (int j =0 ; j < adjacencylist[i].size() ; j++)
-                     if (adjacencylist[i].get(j).getSource() == source && adjacencylist[i].get(j).getTarget() == target){
-                            return adjacencylist[i].get(j).getWeight();
-                     }
-                    
+    }
+
+    //-----------------------------------------------------------------------------
+    // Method to get the weight of a specific edge connecting specific source and specific target 
+    public int getEdgeWeight(Vertex source, Vertex target) {
+
+        // loop to go through the edges of the source vertex
+        for (int i = 0; i < source.getAdjLists().size(); i++) {
+
+            // if the target of the current edge is the same as the specified target 
+            // that means we got the needed edge 
+            if (source.getAdjLists().get(i).getTarget() == target) {
+
+                return source.getAdjLists().get(i).getWeight();
+
             }
-            return 0;
+
         }
-      
-      
-      public ArrayList<Vertex> getNeighbors(Vertex source ){
-         
-          ArrayList<Vertex> neighborsList = new ArrayList<>();
-          for (int i = 0; i < source.getAdjLists().size(); i++) {
-             
-              neighborsList.add(source.getAdjLists().get(i).getTarget());
-          }
-          
-          return neighborsList;
-      }
-      
-      public int getEdgeWeight(Vertex source , Vertex target){
-          for (int i = 0; i < source.getAdjLists().size(); i++) {
-             if(source.getAdjLists().get(i).getTarget() == target)
-                 return source.getAdjLists().get(i).getWeight();
-          }
-          return 0;
-      }
+
+        return 0;
+    }
+
+    
+    //-----------------------------------------------------------------------------
+    // Method to get the weight of a specific edge connecting specific source and specific target 
+    public boolean allVerticesVisited() {
+        int counter = 0;
+        for (int i = 0; i < vertexNo; i++) {
+            if (vertices.get(i).isIsVisited()) {
+                counter++;
+            }
+        }
+
+        return counter == vertexNo;
+    }
+
 }
