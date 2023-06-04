@@ -1,34 +1,33 @@
 package GraphFramework;
- 
 
 import java.util.LinkedList;
 
-public abstract class Vertex  {
+public abstract class Vertex {
+
     
-    private int label ;
-    private boolean isVisited ;    
+    // Defining the data feilds
+    private int label;
+    private boolean isVisited;
     private LinkedList<Edge> adjLists = new LinkedList<>();
-     
-   
-    public Vertex(int label ){
-        this.label = label ;
-        isVisited = false ;
-        
+
+    
+    //-----------------------------------------------------------------------------
+    // Defining the constructor
+    public Vertex() {
+
     }
-  
-public Edge getMinEdge(){
-        int cost = Integer.MAX_VALUE ;
-        Edge min =null;
-        for (int i = 0; i < adjLists.size(); i++) {
-            if(adjLists.get(i).getWeight() < cost){
-                cost = adjLists.get(i).getWeight();
-                min = adjLists.get(i);
-            }
-        }
-        return min ;
+ 
+    public Vertex(int label) {
+
+        this.label = label;
+        isVisited = false;
+
     }
-   
-   public void setLabel(int label) {
+
+    
+    //-----------------------------------------------------------------------------
+    // Defining the setters and getters
+    public void setLabel(int label) {
         this.label = label;
     }
 
@@ -39,9 +38,6 @@ public Edge getMinEdge(){
     public void setAdjLists(LinkedList<Edge> adjLists) {
         this.adjLists = adjLists;
     }
-    public Vertex(){
-        
-    }
 
     public int getLabel() {
         return label;
@@ -50,15 +46,14 @@ public Edge getMinEdge(){
     public boolean isIsVisited() {
         return isVisited;
     }
-    
+
     public LinkedList<Edge> getAdjLists() {
         return adjLists;
     }
 
     
+    //-----------------------------------------------------------------------------
+    // Defining the method that should be overriden in the application framework
+    public abstract String displayInfo();
 
-    
-    public abstract String displayInfo ();
-
-  
 }
